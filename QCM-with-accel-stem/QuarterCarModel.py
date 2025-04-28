@@ -268,7 +268,7 @@ class CarView():
         #create a scene object
         self.scene = qtw.QGraphicsScene()
         self.scene.setObjectName("MyScene")
-        self.scene.setSceneRect(-200, -100, 400, 400)  # xLeft, yTop, Width, Heightt
+        self.scene.setSceneRect(-200, -150, 400, 400)  # xLeft, yTop, Width, Heightt
 
         #set the scene for the graphics view object
         self.gv_Schematic.setScene(self.scene)
@@ -337,7 +337,7 @@ class CarView():
         datumPen = qtg.QPen(qtg.QColor("black"))
         datumPen.setWidth(1)
         datumPen.setStyle(qtc.Qt.DashLine)
-        datumLine = qtw.QGraphicsLineItem(-200, 60, 200, 60)
+        datumLine = qtw.QGraphicsLineItem(-200, 125, 200, 125)
         datumLine.setPen(datumPen)
         self.scene.addItem(datumLine)
 
@@ -409,8 +409,8 @@ class CarView():
         else:
             self.canvas.draw()
         #update schematic parts here
-        newBodyY = ycar[-1] * 300 - 150  # Scale to fit
-        newWheelY = ywheel[-1] * 300 + 50
+        newBodyY = ycar[-1] * 100 - 150  # Scale to fit
+        newWheelY = ywheel[-1] * 1 + 50
 
 
         self.CarBody.y = newBodyY
