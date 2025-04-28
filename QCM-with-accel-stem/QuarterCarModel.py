@@ -263,24 +263,26 @@ class CarView():
         #create a scene object
         self.scene = qtw.QGraphicsScene()
         self.scene.setObjectName("MyScene")
-        self.scene.setSceneRect(-200, -200, 400, 400)  # xLeft, yTop, Width, Heightt
+        self.scene.setSceneRect(-200, -100, 400, 400)  # xLeft, yTop, Width, Heightt
 
         #set the scene for the graphics view object
         self.gv_Schematic.setScene(self.scene)
         #make some pens and brushes for my drawing
         self.setupPensAndBrushes()
+        # Define positions and sizes for better alignment
+
         self.Wheel = Wheel(0,50,50, pen=self.penWheel, wheelBrush=self.brushWheel, massBrush=self.brushMass, name = "Wheel")
         self.CarBody = MassBlock(0, -70, 100, 30, pen=self.penWheel, brush=self.brushMass, name="Car Body", mass=150)
         self.Wheel.addToScene(self.scene)
         self.scene.addItem(self.CarBody)
         #Add a spring between Car Body and Wheel
-        self.spring = Spring(self.CarBody.x, self.CarBody.y + 20, self.Wheel.x, self.Wheel.y - 20)
+        self.spring = Spring(self.CarBody.x-20, self.CarBody.y + 15, self.Wheel.x, self.Wheel.y - 10)
         springPen = qtg.QPen(qtg.QColor("blue"))
         springPen.setWidth(2)
         self.spring.pen = springPen
         self.scene.addItem(self.spring)
         #Add a dashpot between Car Body and Wheel
-        self.dashpot = qtw.QGraphicsLineItem(self.CarBody.x, self.CarBody.y + 20, self.Wheel.x, self.Wheel.y - 20)
+        self.dashpot = qtw.QGraphicsLineItem(self.CarBody.x+30, self.CarBody.y + 15, self.Wheel.x+30, self.Wheel.y - 10)
         dashpotPen = qtg.QPen(qtg.QColor("green"))
         dashpotPen.setWidth(2)
         self.dashpot.setPen(dashpotPen)
@@ -301,7 +303,7 @@ class CarView():
         self.scene.addItem(roadItem)
 
         # Add the tire spring (k2) between the wheel and the road
-        self.tireSpring = Spring(self.Wheel.x, self.Wheel.y + 20, self.Wheel.x, self.Wheel.y + 50)
+        self.tireSpring = Spring(self.Wheel.x-10, self.Wheel.y + 20, self.Wheel.x, self.Wheel.y + 50)
         tireSpringPen = qtg.QPen(qtg.QColor("red"))
         tireSpringPen.setWidth(2)
         self.tireSpring.pen = tireSpringPen
@@ -326,7 +328,7 @@ class CarView():
         datumPen = qtg.QPen(qtg.QColor("black"))
         datumPen.setWidth(1)
         datumPen.setStyle(qtc.Qt.DashLine)
-        datumLine = qtw.QGraphicsLineItem(-200, 0, 200, 0)
+        datumLine = qtw.QGraphicsLineItem(-200, 60, 200, 60)
         datumLine.setPen(datumPen)
         self.scene.addItem(datumLine)
 
@@ -400,6 +402,7 @@ class CarView():
         #update schematic parts here
         newBodyY = ycar[-1] * 300 - 150  # Scale to fit
         newWheelY = ywheel[-1] * 300 + 50
+
 
         self.CarBody.y = newBodyY
         self.Wheel.y = newWheelY
