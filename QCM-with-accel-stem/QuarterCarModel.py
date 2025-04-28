@@ -99,86 +99,85 @@ class Wheel(qtw.QGraphicsItem):
 
 class Spring(qtw.QGraphicsItem):
     def __init__(self, x1, y1, x2, y2, parent=None, pen=None):
-        super().__init__(parent)
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
-        self.pen = pen if pen else qtg.QPen(qtc.Qt.black)
-        self.updateEndpoints(x1, y1, x2, y2)
+        super().__init__(parent)  # Initialize parent QGraphicsItem
+        self.x1 = x1  # Starting x-coordinate
+        self.y1 = y1  # Starting y-coordinate
+        self.x2 = x2  # Ending x-coordinate
+        self.y2 = y2  # Ending y-coordinate
+        self.pen = pen if pen else qtg.QPen(qtc.Qt.black)  # Default pen if none provided
+        self.updateEndpoints(x1, y1, x2, y2)  # Update geometry based on endpoints
 
     def boundingRect(self):
+        # Create bounding rectangle expanded a little for drawing safety
         return qtc.QRectF(0, 0, self.width, self.height).adjusted(-10, -10, 10, 10)
 
     def paint(self, painter, option, widget=None):
-        painter.setPen(self.pen)
-        path = qtg.QPainterPath()
-        path.moveTo(self.width / 2, 0)  # Start in the middle of the top
-
+        painter.setPen(self.pen)  # Set pen
+        path = qtg.QPainterPath()  # Create a painter path
+        path.moveTo(self.width / 2, 0)  # Start path at the middle-top
         n = 8  # Number of zigzag segments
-        segment_height = self.height / (n + 2)  # Divide height into segments (including straight ends)
-        path.lineTo(self.width / 2, segment_height)  # Straight line at the top
-
-        # Zigzag pattern
+        segment_height = self.height / (n + 2)  # Calculate vertical spacing for zigzag
+        path.lineTo(self.width / 2, segment_height)  # Start vertical line
+        # Create zigzag pattern by alternating sides
         for i in range(n):
-            x = 0 if i % 2 == 0 else self.width
-            y = segment_height * (i + 2)
+            x = 0 if i % 2 == 0 else self.width  # Alternate x between left and right
+            y = segment_height * (i + 2)  # Move down by segment height
             path.lineTo(x, y)
-
-        path.lineTo(self.width / 2, self.height)  # Straight line at the bottom
-        painter.drawPath(path)
+        path.lineTo(self.width / 2, self.height)  # Finish at center-bottom
+        painter.drawPath(path)  # Draw the final spring shape
 
     def updateEndpoints(self, x1, y1, x2, y2):
-        self.prepareGeometryChange()
-        self.setPos(x1, y1)
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
-        self.width = 20  # Fixed width for the spring
-        self.height = y2 - y1
-        self.update()
+        self.prepareGeometryChange()  # Prepare for changes in geometry
+        self.setPos(x1, y1)  # Set position of spring
+        self.x1 = x1  # Update internal x1
+        self.y1 = y1  # Update internal y1
+        self.x2 = x2  # Update internal x2
+        self.y2 = y2  # Update internal y2
+        self.width = 20  # Fixed width of spring drawing
+        self.height = y2 - y1  # Set height based on start and end points
+        self.update()  # Force item to redraw
 
+# Class that defines a dashpot (shock absorber) graphical object
 class DashpotItem(qtw.QGraphicsItem):
     def __init__(self, x1, y1, x2, y2, parent=None, pen=None):
-        super().__init__(parent)
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
-        self.pen = pen if pen else qtg.QPen(qtc.Qt.black)
-        self.updateEndpoints(x1, y1, x2, y2)
+        super().__init__(parent)  # Initialize parent QGraphicsItem
+        self.x1 = x1  # Start x-coordinate
+        self.y1 = y1  # Start y-coordinate
+        self.x2 = x2  # End x-coordinate
+        self.y2 = y2  # End y-coordinate
+        self.pen = pen if pen else qtg.QPen(qtc.Qt.black)  # Default black pen if none provided
+        self.updateEndpoints(x1, y1, x2, y2)  # Update geometry
 
     def boundingRect(self):
+        # Create bounding rectangle for the dashpot
         return qtc.QRectF(0, 0, self.width, self.height).adjusted(-10, -10, 10, 10)
 
     def paint(self, painter, option, widget=None):
-        painter.setPen(self.pen)
-        painter.setBrush(qtg.QBrush(qtg.QColor(200, 200, 200, 128)))  # Light gray fill for the cylinder
+        painter.setPen(self.pen)  # Set pen for drawing
+        painter.setBrush(qtg.QBrush(qtg.QColor(200, 200, 200, 128)))  # Light gray brush for filling the cylinder
 
-        # Cylinder (body of the dashpot)
-        cylinder_height = self.height * 0.6
-        cylinder_rect = qtc.QRectF(0, 0, self.width, cylinder_height)
-        painter.drawRect(cylinder_rect)
+        cylinder_height = self.height * 0.6  # Set 60% height for cylinder body
+        cylinder_rect = qtc.QRectF(0, 0, self.width, cylinder_height)  # Define rectangle for cylinder
+        painter.drawRect(cylinder_rect)  # Draw cylinder rectangle
 
-        # Piston rod
-        rod_width = self.width * 0.3
-        rod_rect = qtc.QRectF(self.width / 2 - rod_width / 2, cylinder_height, rod_width, self.height - cylinder_height)
-        painter.drawRect(rod_rect)
+        rod_width = self.width * 0.3  # Width of piston rod inside the cylinder
+        rod_rect = qtc.QRectF(self.width / 2 - rod_width / 2, cylinder_height, rod_width, self.height - cylinder_height)  # Define rod rectangle
+        painter.drawRect(rod_rect)  # Draw piston rod
 
-        # Piston inside the cylinder
-        painter.drawLine(0, cylinder_height / 2, self.width, cylinder_height / 2)
+        painter.drawLine(0, cylinder_height / 2, self.width, cylinder_height / 2)  # Draw a horizontal line across cylinder center
 
     def updateEndpoints(self, x1, y1, x2, y2):
-        self.prepareGeometryChange()
-        self.setPos(x1, y1)
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
-        self.width = 20  # Fixed width for the dashpot
-        self.height = y2 - y1
-        self.update()
+        self.prepareGeometryChange()  # Prepare for geometry change
+        self.setPos(x1, y1)  # Set new position
+        self.x1 = x1  # Store new x1
+        self.y1 = y1  # Store new y1
+        self.x2 = x2  # Store new x2
+        self.y2 = y2  # Store new y2
+        self.width = 20  # Fixed width
+        self.height = y2 - y1  # Update height based on endpoints
+        self.update()  # Force redraw
+#endregion
+
 #endregion
 
 #region MVC for quarter car model
@@ -263,24 +262,26 @@ class CarView():
         #create a scene object
         self.scene = qtw.QGraphicsScene()
         self.scene.setObjectName("MyScene")
-        self.scene.setSceneRect(-200, -200, 400, 400)  # xLeft, yTop, Width, Heightt
+        self.scene.setSceneRect(-200, -100, 400, 400)  # xLeft, yTop, Width, Heightt
 
         #set the scene for the graphics view object
         self.gv_Schematic.setScene(self.scene)
         #make some pens and brushes for my drawing
         self.setupPensAndBrushes()
+        # Define positions and sizes for better alignment
+
         self.Wheel = Wheel(0,50,50, pen=self.penWheel, wheelBrush=self.brushWheel, massBrush=self.brushMass, name = "Wheel")
         self.CarBody = MassBlock(0, -70, 100, 30, pen=self.penWheel, brush=self.brushMass, name="Car Body", mass=150)
         self.Wheel.addToScene(self.scene)
         self.scene.addItem(self.CarBody)
         #Add a spring between Car Body and Wheel
-        self.spring = Spring(self.CarBody.x, self.CarBody.y + 20, self.Wheel.x, self.Wheel.y - 20)
+        self.spring = Spring(self.CarBody.x-20, self.CarBody.y + 15, self.Wheel.x, self.Wheel.y - 10)
         springPen = qtg.QPen(qtg.QColor("blue"))
         springPen.setWidth(2)
         self.spring.pen = springPen
         self.scene.addItem(self.spring)
         #Add a dashpot between Car Body and Wheel
-        self.dashpot = qtw.QGraphicsLineItem(self.CarBody.x, self.CarBody.y + 20, self.Wheel.x, self.Wheel.y - 20)
+        self.dashpot = qtw.QGraphicsLineItem(self.CarBody.x+30, self.CarBody.y + 15, self.Wheel.x+30, self.Wheel.y - 10)
         dashpotPen = qtg.QPen(qtg.QColor("green"))
         dashpotPen.setWidth(2)
         self.dashpot.setPen(dashpotPen)
@@ -291,47 +292,47 @@ class CarView():
         roadPen.setWidth(2)
         roadBrush = qtg.QBrush(qtg.QColor(150, 150, 150, 128))  # Gray fill for the road
         roadPath = qtg.QPainterPath()
-        roadPath.moveTo(-200, self.Wheel.y + 50)  # Start at the left edge
+        roadPath.moveTo(-200, self.Wheel.y + 75)  # Start at the left edge
         roadPath.lineTo(-50, self.Wheel.y + 50)  # Flat section before the ramp
-        roadPath.lineTo(0, self.Wheel.y)  # Ramp up to the wheel's position
-        roadPath.lineTo(200, self.Wheel.y)  # Flat section after the ramp
+        roadPath.lineTo(0, self.Wheel.y+45)  # Ramp up to the wheel's position
+        roadPath.lineTo(200, self.Wheel.y+40)  # Flat section after the ramp
         roadItem = qtw.QGraphicsPathItem(roadPath)
         roadItem.setPen(roadPen)
         roadItem.setBrush(roadBrush)
         self.scene.addItem(roadItem)
 
         # Add the tire spring (k2) between the wheel and the road
-        self.tireSpring = Spring(self.Wheel.x, self.Wheel.y + 20, self.Wheel.x, self.Wheel.y + 50)
+        self.tireSpring = Spring(self.Wheel.x-10, self.Wheel.y + 20, self.Wheel.x, self.Wheel.y + 50)
         tireSpringPen = qtg.QPen(qtg.QColor("red"))
         tireSpringPen.setWidth(2)
         self.tireSpring.pen = tireSpringPen
         self.scene.addItem(self.tireSpring)
         bodyLabel = qtw.QGraphicsTextItem("Body")
-        bodyLabel.setPos(self.CarBody.x - 60, self.CarBody.y - 10)
+        bodyLabel.setPos(self.CarBody.x - 20, self.CarBody.y - 35)
         self.scene.addItem(bodyLabel)
 
         suspensionLabel = qtw.QGraphicsTextItem("Suspension")
-        suspensionLabel.setPos(self.CarBody.x - 80, (self.CarBody.y + self.Wheel.y) / 2)
+        suspensionLabel.setPos(self.CarBody.x +70, (self.CarBody.y + self.Wheel.y) / 2)
         self.scene.addItem(suspensionLabel)
 
         wheelLabel = qtw.QGraphicsTextItem("Wheel")
-        wheelLabel.setPos(self.Wheel.x - 60, self.Wheel.y - 10)
+        wheelLabel.setPos(self.Wheel.x +60, self.Wheel.y - 10)
         self.scene.addItem(wheelLabel)
 
         roadLabel = qtw.QGraphicsTextItem("Road")
-        roadLabel.setPos(self.Wheel.x - 60, self.Wheel.y + 50)
+        roadLabel.setPos(self.Wheel.x +60, self.Wheel.y + 50)
         self.scene.addItem(roadLabel)
 
         # Add datum level line
         datumPen = qtg.QPen(qtg.QColor("black"))
         datumPen.setWidth(1)
         datumPen.setStyle(qtc.Qt.DashLine)
-        datumLine = qtw.QGraphicsLineItem(-200, 0, 200, 0)
+        datumLine = qtw.QGraphicsLineItem(-200, 60, 200, 60)
         datumLine.setPen(datumPen)
         self.scene.addItem(datumLine)
 
         datumLabel = qtw.QGraphicsTextItem("Datum Level")
-        datumLabel.setPos(150, -10)
+        datumLabel.setPos(150, -250)
         self.scene.addItem(datumLabel)
 
     def setupPensAndBrushes(self):
@@ -400,6 +401,7 @@ class CarView():
         #update schematic parts here
         newBodyY = ycar[-1] * 300 - 150  # Scale to fit
         newWheelY = ywheel[-1] * 300 + 50
+
 
         self.CarBody.y = newBodyY
         self.Wheel.y = newWheelY
