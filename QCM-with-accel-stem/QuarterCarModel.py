@@ -263,7 +263,7 @@ class CarView():
         #create a scene object
         self.scene = qtw.QGraphicsScene()
         self.scene.setObjectName("MyScene")
-        self.scene.setSceneRect(-200, -200, 400, 400)  # xLeft, yTop, Width, Height
+        self.scene.setSceneRect(-200, -200, 400, 400)  # xLeft, yTop, Width, Heightt
 
         #set the scene for the graphics view object
         self.gv_Schematic.setScene(self.scene)
@@ -286,6 +286,53 @@ class CarView():
         self.dashpot.setPen(dashpotPen)
         self.scene.addItem(self.dashpot)
         ''' ---------------------'''
+        # Add the road surface with a ramp
+        roadPen = qtg.QPen(qtg.QColor("black"))
+        roadPen.setWidth(2)
+        roadBrush = qtg.QBrush(qtg.QColor(150, 150, 150, 128))  # Gray fill for the road
+        roadPath = qtg.QPainterPath()
+        roadPath.moveTo(-200, self.Wheel.y + 50)  # Start at the left edge
+        roadPath.lineTo(-50, self.Wheel.y + 50)  # Flat section before the ramp
+        roadPath.lineTo(0, self.Wheel.y)  # Ramp up to the wheel's position
+        roadPath.lineTo(200, self.Wheel.y)  # Flat section after the ramp
+        roadItem = qtw.QGraphicsPathItem(roadPath)
+        roadItem.setPen(roadPen)
+        roadItem.setBrush(roadBrush)
+        self.scene.addItem(roadItem)
+
+        # Add the tire spring (k2) between the wheel and the road
+        self.tireSpring = Spring(self.Wheel.x, self.Wheel.y + 20, self.Wheel.x, self.Wheel.y + 50)
+        tireSpringPen = qtg.QPen(qtg.QColor("red"))
+        tireSpringPen.setWidth(2)
+        self.tireSpring.pen = tireSpringPen
+        self.scene.addItem(self.tireSpring)
+        bodyLabel = qtw.QGraphicsTextItem("Body")
+        bodyLabel.setPos(self.CarBody.x - 60, self.CarBody.y - 10)
+        self.scene.addItem(bodyLabel)
+
+        suspensionLabel = qtw.QGraphicsTextItem("Suspension")
+        suspensionLabel.setPos(self.CarBody.x - 80, (self.CarBody.y + self.Wheel.y) / 2)
+        self.scene.addItem(suspensionLabel)
+
+        wheelLabel = qtw.QGraphicsTextItem("Wheel")
+        wheelLabel.setPos(self.Wheel.x - 60, self.Wheel.y - 10)
+        self.scene.addItem(wheelLabel)
+
+        roadLabel = qtw.QGraphicsTextItem("Road")
+        roadLabel.setPos(self.Wheel.x - 60, self.Wheel.y + 50)
+        self.scene.addItem(roadLabel)
+
+        # Add datum level line
+        datumPen = qtg.QPen(qtg.QColor("black"))
+        datumPen.setWidth(1)
+        datumPen.setStyle(qtc.Qt.DashLine)
+        datumLine = qtw.QGraphicsLineItem(-200, 0, 200, 0)
+        datumLine.setPen(datumPen)
+        self.scene.addItem(datumLine)
+
+        datumLabel = qtw.QGraphicsTextItem("Datum Level")
+        datumLabel.setPos(150, -10)
+        self.scene.addItem(datumLabel)
 
     def setupPensAndBrushes(self):
         self.penWheel = qtg.QPen(qtg.QColor("orange"))
@@ -350,7 +397,7 @@ class CarView():
             plt.show()
         else:
             self.canvas.draw()
-        # 🎯 MOVE the schematic parts here
+        #update schematic parts here
         newBodyY = ycar[-1] * 300 - 150  # Scale to fit
         newWheelY = ywheel[-1] * 300 + 50
 
