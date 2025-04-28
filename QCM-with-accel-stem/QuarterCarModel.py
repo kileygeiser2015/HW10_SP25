@@ -263,7 +263,7 @@ class CarView():
         #create a scene object
         self.scene = qtw.QGraphicsScene()
         self.scene.setObjectName("MyScene")
-        self.scene.setSceneRect(-200, -200, 400, 400)  # xLeft, yTop, Width, Height
+        self.scene.setSceneRect(-200, -200, 400, 400)  # xLeft, yTop, Width, Heightt
 
         #set the scene for the graphics view object
         self.gv_Schematic.setScene(self.scene)
