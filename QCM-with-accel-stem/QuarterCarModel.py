@@ -181,47 +181,53 @@ class DashpotItem(qtw.QGraphicsItem):
 #endregion
 
 #region MVC for quarter car model
+#region MVC for quarter car model
+
+# 🚗 Class that defines the "Model" — it stores all the car's properties and simulation results
 class CarModel():
     """
-    I re-wrote the quarter car model as an object oriented program
-    and used the MVC pattern.  This is the quarter car model.  It just
-    stores information about the car and results of the ode calculation.
+    I re-wrote the quarter car model as an object-oriented program
+    and used the MVC pattern. This class stores information about the car and
+    results of the ODE calculation.
     """
     def __init__(self):
-        """
-        self.results to hold results of odeint solution
-        self.t time vector for odeint and for plotting
-        self.tramp is time required to climb the ramp
-        self.angrad is the ramp angle in radians
-        self.ymag is the ramp height in m
-        """
+        # Simulation results from solving the ODEs (starts empty)
         self.results = []
-        self.tmax = 3.0  # limit of timespan for simulation in seconds
+        # Max simulation time in seconds
+        self.tmax = 3.0
+        # Create a time vector from 0 to tmax with 200 points
         self.t = np.linspace(0, self.tmax, 200)
-        self.tramp = 1.0  # time to traverse the ramp in seconds
+        # Time required to climb the ramp (in seconds)
+        self.tramp = 1.0
+        # Ramp angle in radians (default small angle)
         self.angrad = 0.1
-        self.ymag = 6.0 / (12 * 3.3)  # ramp height in meters.  default is 0.1515 m
-        self.yangdeg = 45.0  # ramp angle in degrees.  default is 45
+        # Ramp height in meters (6 inches divided by 12 inches/foot * 3.3 ft/m)
+        self.ymag = 6.0 / (12 * 3.3)
+        # Ramp angle in degrees (default 45° for a steep ramp)
+        self.yangdeg = 45.0
+        # Set results to None initially (until simulation is run)
         self.results = None
 
-        #set default values for the properties of the quarter car model
-        self.m1 = 450 # mass of car body in kg
-        self.m2 = 20  # mass of wheel in kg
-        self.c1 = 4500  # damping coefficient in N*s/m
-        self.k1 = 15000  # spring constant of suspension in N/m
-        self.k2 = 90000  # spring constant of tire in N/m
-        self.v = 120 # velocity of car in kph
+        # Set default physical parameters of the car model
+        self.m1 = 450  # Mass of car body in kg
+        self.m2 = 20  # Mass of wheel in kg
+        self.c1 = 4500  # Damping coefficient of suspension (N·s/m)
+        self.k1 = 15000  # Spring constant of suspension (N/m)
+        self.k2 = 90000  # Spring constant of tire (N/m)
+        self.v = 120  # Vehicle speed in kilometers per hour
 
-        #Suspension spring k1
-        self.mink1 = (self.m1*9.81)/(3.0*.0254) #If I jack up my car and release the load on the spring, it extends about 3 inches
-        self.maxk1 = (self.m1 * 9.81) / (6.0 * 0.0254)  #What would be a good value for a soft spring vs. a stiff spring?
-        #tire spring k2
-        self.mink2 = (self.m2 * 9.81) / (1.5 * 0.0254)  #Same question for the shock absorber.
-        self.maxk2 = (self.m2 * 9.81) / (0.75 * 0.0254)
-        self.accel =None
-        self.accelMax = 0.0
-        self.accelLim = 2.0
-        self.SSE = 0.0
+        # Calculate realistic ranges for suspension and tire stiffness based on typical deflections
+        self.mink1 = (self.m1 * 9.81) / (3.0 * 0.0254)  # Minimum suspension stiffness (spring extends about 3 inches)
+        self.maxk1 = (self.m1 * 9.81) / (6.0 * 0.0254)  # Maximum suspension stiffness (softer spring)
+        self.mink2 = (self.m2 * 9.81) / (1.5 * 0.0254)  # Minimum tire stiffness
+        self.maxk2 = (self.m2 * 9.81) / (0.75 * 0.0254)  # Maximum tire stiffness (hard tire)
+
+        # These hold additional analysis results
+        self.accel = None  # Acceleration data (vertical)
+        self.accelMax = 0.0  # Maximum vertical acceleration (in g’s)
+        self.accelLim = 2.0  # Target acceleration limit (g's)
+        self.SSE = 0.0  # Sum of squared error between car position and road profile
+
 
 class CarView():
     def __init__(self, args):
@@ -268,25 +274,27 @@ class CarView():
         self.gv_Schematic.setScene(self.scene)
         #make some pens and brushes for my drawing
         self.setupPensAndBrushes()
-        # Define positions and sizes for better alignment
+        #Create the wheel and car body and add to scene
 
         self.Wheel = Wheel(0,50,50, pen=self.penWheel, wheelBrush=self.brushWheel, massBrush=self.brushMass, name = "Wheel")
         self.CarBody = MassBlock(0, -70, 100, 30, pen=self.penWheel, brush=self.brushMass, name="Car Body", mass=150)
         self.Wheel.addToScene(self.scene)
         self.scene.addItem(self.CarBody)
+
         #Add a spring between Car Body and Wheel
         self.spring = Spring(self.CarBody.x-20, self.CarBody.y + 15, self.Wheel.x, self.Wheel.y - 10)
         springPen = qtg.QPen(qtg.QColor("blue"))
         springPen.setWidth(2)
         self.spring.pen = springPen
         self.scene.addItem(self.spring)
+
         #Add a dashpot between Car Body and Wheel
         self.dashpot = qtw.QGraphicsLineItem(self.CarBody.x+30, self.CarBody.y + 15, self.Wheel.x+30, self.Wheel.y - 10)
         dashpotPen = qtg.QPen(qtg.QColor("green"))
         dashpotPen.setWidth(2)
         self.dashpot.setPen(dashpotPen)
         self.scene.addItem(self.dashpot)
-        ''' ---------------------'''
+
         # Add the road surface with a ramp
         roadPen = qtg.QPen(qtg.QColor("black"))
         roadPen.setWidth(2)
@@ -310,6 +318,8 @@ class CarView():
         bodyLabel = qtw.QGraphicsTextItem("Body")
         bodyLabel.setPos(self.CarBody.x - 20, self.CarBody.y - 35)
         self.scene.addItem(bodyLabel)
+
+        #add labels for each
 
         suspensionLabel = qtw.QGraphicsTextItem("Suspension")
         suspensionLabel.setPos(self.CarBody.x +70, (self.CarBody.y + self.Wheel.y) / 2)
